@@ -172,7 +172,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun getInputImage(context: Context, filePath: String = ""): InputImage? {
-        val assetFilename = "screenshot_instagram.jpg"
+        val assetFilename = "screenshot_home.jpg"
         if (filePath.isEmpty()) {
             val inputStream = context.assets.open(assetFilename)
             val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -193,30 +193,66 @@ class MainActivity : ComponentActivity() {
         return InputImage.fromFilePath(context, uri)
     }
 
-    private fun detectTextFromImage(image: InputImage, targetText: String, onResult: (Boolean) -> Unit) {
-        try {
-            // Process the image
-            latinRecognizer.process(image)
-                .addOnSuccessListener { latinText ->
-                    val detectedTextLatin = latinText.text
-                    val containsLatin = detectedTextLatin.contains(targetText, ignoreCase = true)
+//    private fun detectTextFromImage(image: InputImage, targetText: String, onResult: (Boolean) -> Unit) {
+//        try {
+//            // Process the image
+//            latinRecognizer.process(image)
+//                .addOnSuccessListener { latinText ->
+//                    val detectedTextLatin = latinText.text
+//                    val containsLatin = detectedTextLatin.contains(targetText, ignoreCase = true)
+//
+//                    if (containsLatin) {
+//                        onResult(containsLatin)
+//                    } else {
+//                        chineseRecognizer.process(image)
+//                            .addOnSuccessListener { chineseResult ->
+//                                val detectedTextChinese = chineseResult.text
+//                                val containsChinese = detectedTextChinese.contains(targetText, ignoreCase = true)
+//                                onResult(containsChinese)
+//                            }
+//                    }
+//                }
+//                .addOnFailureListener { e ->
+//                    e.printStackTrace()
+//                    onResult(false)
+//                }
+//
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            onResult(false)
+//        }
+//    }
 
-                    if (containsLatin) {
-                        onResult(containsLatin)
+    private fun detectTextFromImage(
+        image: InputImage,
+        targetText: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        val recognizers = listOf(latinRecognizer, chineseRecognizer)
+
+        fun processNext(index: Int) {
+            if (index >= recognizers.size) {
+                onResult(false)
+                return
+            }
+
+            val recognizer = recognizers[index]
+            recognizer.process(image)
+                .addOnSuccessListener { result ->
+                    val detectedText = result.text
+                    if (detectedText.contains(targetText, ignoreCase = true)) {
+                        onResult(true)
                     } else {
-                        chineseRecognizer.process(image)
-                            .addOnSuccessListener { chineseResult ->
-                                val detectedTextChinese = chineseResult.text
-                                val containsChinese = detectedTextChinese.contains(targetText, ignoreCase = true)
-                                onResult(containsChinese)
-                            }
+                        processNext(index + 1)
                     }
                 }
-                .addOnFailureListener { e ->
-                    e.printStackTrace()
-                    onResult(false)
+                .addOnFailureListener {
+                    processNext(index + 1)
                 }
+        }
 
+        try {
+            processNext(0)
         } catch (e: Exception) {
             e.printStackTrace()
             onResult(false)
