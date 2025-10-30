@@ -193,36 +193,6 @@ class MainActivity : ComponentActivity() {
         return InputImage.fromFilePath(context, uri)
     }
 
-//    private fun detectTextFromImage(image: InputImage, targetText: String, onResult: (Boolean) -> Unit) {
-//        try {
-//            // Process the image
-//            latinRecognizer.process(image)
-//                .addOnSuccessListener { latinText ->
-//                    val detectedTextLatin = latinText.text
-//                    val containsLatin = detectedTextLatin.contains(targetText, ignoreCase = true)
-//
-//                    if (containsLatin) {
-//                        onResult(containsLatin)
-//                    } else {
-//                        chineseRecognizer.process(image)
-//                            .addOnSuccessListener { chineseResult ->
-//                                val detectedTextChinese = chineseResult.text
-//                                val containsChinese = detectedTextChinese.contains(targetText, ignoreCase = true)
-//                                onResult(containsChinese)
-//                            }
-//                    }
-//                }
-//                .addOnFailureListener { e ->
-//                    e.printStackTrace()
-//                    onResult(false)
-//                }
-//
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            onResult(false)
-//        }
-//    }
-
     private fun detectTextFromImage(
         image: InputImage,
         targetText: String,
